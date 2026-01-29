@@ -1,773 +1,757 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#0b1020" />
-  <meta name="color-scheme" content="dark light" />
-  <title>Northbound Mobility: A Policy Kit for Faster, Legal U.S. Entry + Work Pathways into Canada (Offline-First) • Foster + Navi</title>
+<html lang="en">  
+<head>  
+  <meta charset="utf-8" />  
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />  
+  <meta name="theme-color" content="#0b1020" />  
+  <meta name="color-scheme" content="dark light" />  
+  <title>Northbound Mobility: A Policy Kit for Faster, Legal U.S. Entry + Work Pathways into Canada (Offline-First) • Foster + Navi</title>    <!--  
+    Zero-Harm & Anti-Inversion Note (Visible + Comment):  
+    This policy kit supports lawful mobility, humane administration, and evidence-based redesign of entry/work processes.  
+    It does NOT promote evasion, fraud, coercion, targeting, harassment, or any kind of illegal border activity.  
+    No telemetry. No auto-send. Everything is stored locally (IndexedDB), user-controlled, and resettable.  
+  -->    <style>  
+    /* =========================================================  
+      TOOLTIP: Design Tokens  
+      - What: Global CSS variables controlling color, spacing, typography  
+      - How: Edit :root to re-theme; all UI inherits from tokens  
+      - Outcome: Consistent look + easy expansion across sequential files  
+    ========================================================== */  
+    :root{  
+      --bg0:#070a14; --bg1:#0b1020; --bg2:#101a33;  
+      --card:#0e1630cc; --card2:#0b132bcc;  
+      --text:#eaf0ff; --muted:#b8c4e6;  
+      --faint:#7f8ab0;  
+      --accent:#7bdcff; --accent2:#b7ff6a; --warn:#ffd36a; --danger:#ff6b8b;  
+      --border:rgba(130,160,255,.18);  
+      --shadow: 0 18px 50px rgba(0,0,0,.45);  
+      --r12:12px; --r16:16px; --r20:20px;  
+      --pad:16px; --pad2:22px;  
+      --max:1180px;  
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;  
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";  
+    }  
+    *{box-sizing:border-box}  
+    html,body{height:100%}  
+    body{  
+      margin:0; font-family:var(--sans); color:var(--text);  
+      background:  
+        radial-gradient(1200px 700px at 20% 10%, rgba(123,220,255,.18), transparent 55%),  
+        radial-gradient(900px 700px at 80% 30%, rgba(183,255,106,.10), transparent 55%),  
+        radial-gradient(900px 900px at 60% 90%, rgba(255,107,139,.08), transparent 55%),  
+        linear-gradient(180deg, var(--bg0), var(--bg1) 35%, var(--bg2));  
+      overflow-x:hidden;  
+    }  
+    a{color:inherit}  
+    .wrap{max-width:var(--max); margin:0 auto; padding: 18px 14px 90px;}  
+    .topbar{  
+      position:sticky; top:0; z-index:50;  
+      backdrop-filter: blur(10px);  
+      background: linear-gradient(180deg, rgba(7,10,20,.88), rgba(7,10,20,.55));  
+      border-bottom:1px solid var(--border);  
+    }  
+    .topbarInner{max-width:var(--max); margin:0 auto; padding: 10px 14px; display:flex; gap:12px; align-items:center; justify-content:space-between;}  
+    .brand{display:flex; gap:10px; align-items:center;}  
+    .sig{  
+      width:38px; height:38px; border-radius:14px;  
+      background: radial-gradient(circle at 30% 30%, rgba(123,220,255,.85), rgba(183,255,106,.35) 45%, rgba(255,107,139,.15) 70%, rgba(0,0,0,0) 74%),  
+                  linear-gradient(135deg, rgba(123,220,255,.35), rgba(183,255,106,.22));  
+      border:1px solid var(--border);  
+      box-shadow: 0 12px 30px rgba(0,0,0,.35);  
+      position:relative;  
+      overflow:hidden;  
+    }  
+    .sig:after{  
+      content:""; position:absolute; inset:-40%;  
+      background: conic-gradient(from 90deg, rgba(123,220,255,.0), rgba(123,220,255,.35), rgba(183,255,106,.25), rgba(255,107,139,.18), rgba(123,220,255,.0));  
+      animation: spin 10s linear infinite;  
+    }  
+    @keyframes spin{to{transform:rotate(360deg)}}  
+    .brand h1{margin:0; font-size:14px; letter-spacing:.2px}  
+    .brand .sub{margin:0; color:var(--muted); font-size:12px}  
+    .controls{display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end}  
+    .btn{  
+      appearance:none; border:1px solid var(--border); color:var(--text);  
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.10));  
+      padding:10px 12px; border-radius:14px; cursor:pointer;  
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);  
+      font-weight:700; font-size:12px;  
+      transition: transform .08s ease, border-color .2s ease;  
+    }  
+    .btn:hover{transform: translateY(-1px); border-color: rgba(123,220,255,.45)}  
+    .btn:active{transform: translateY(0)}  
+    .btn.secondary{font-weight:650; opacity:.95}  
+    .btn.good{border-color: rgba(183,255,106,.35)}  
+    .btn.warn{border-color: rgba(255,211,106,.35)}  
+    .btn.danger{border-color: rgba(255,107,139,.35)}  
+    .pill{  
+      display:inline-flex; gap:8px; align-items:center;  
+      border:1px solid var(--border);  
+      background: rgba(14,22,48,.55);  
+      padding:8px 10px; border-radius:999px; color:var(--muted);  
+      font-size:12px;  
+    }  
+    .grid{  
+      display:grid; grid-template-columns: 1.05fr .95fr; gap:16px; align-items:start;  
+      margin-top:18px;  
+    }  
+    @media (max-width: 980px){ .grid{grid-template-columns:1fr} }  
+    .hero{  
+      border:1px solid var(--border);  
+      background: linear-gradient(180deg, rgba(14,22,48,.72), rgba(11,19,43,.60));  
+      border-radius: var(--r20);  
+      padding: 18px 18px 14px;  
+      box-shadow: var(--shadow);  
+      position:relative;  
+      overflow:hidden;  
+    }  
+    .hero:before{  
+      content:""; position:absolute; inset:-2px;  
+      background:  
+        radial-gradient(700px 220px at 20% 15%, rgba(123,220,255,.18), transparent 60%),  
+        radial-gradient(520px 260px at 70% 30%, rgba(183,255,106,.10), transparent 60%),  
+        radial-gradient(520px 260px at 80% 90%, rgba(255,107,139,.09), transparent 60%);  
+      pointer-events:none;  
+    }  
+    .hero > *{position:relative}  
+    .kicker{color:var(--muted); font-size:13px; margin:0 0 8px}  
+    .title{font-size:22px; margin:0 0 10px; letter-spacing:.1px}  
+    .lead{color:var(--muted); line-height:1.55; margin:0 0 12px}  
+    .callouts{display:flex; gap:10px; flex-wrap:wrap}  
+    .card{  
+      border:1px solid var(--border);  
+      background: rgba(14,22,48,.56);  
+      border-radius: var(--r20);  
+      padding: var(--pad);  
+      box-shadow: var(--shadow);  
+    }  
+    .card h2{margin:0 0 10px; font-size:14px; letter-spacing:.25px}  
+    .muted{color:var(--muted)}  
+    .small{font-size:12px}  
+    .mono{font-family:var(--mono)}  
+    .toc{  
+      display:grid; gap:10px;  
+    }  
+    details{  
+      border:1px solid var(--border);  
+      background: rgba(11,19,43,.52);  
+      border-radius: 16px;  
+      padding: 10px 12px;  
+    }  
+    summary{  
+      cursor:pointer;  
+      display:flex; align-items:center; justify-content:space-between; gap:12px;  
+      font-weight:800;  
+      list-style:none;  
+    }  
+    summary::-webkit-details-marker{display:none}  
+    .tag{  
+      font-size:11px; color:var(--muted);  
+      border:1px solid var(--border);  
+      border-radius:999px; padding:6px 8px;  
+      background: rgba(255,255,255,.04);  
+      white-space:nowrap;  
+    }  
+    .content{padding:10px 2px 2px; color:var(--muted); line-height:1.6}  
+    .content ul{margin:8px 0 0 18px}  
+    .content li{margin:7px 0}  
+    .hr{height:1px; background: var(--border); margin: 14px 0}  
+    .inputRow{display:flex; gap:10px; flex-wrap:wrap; align-items:center}  
+    .input{  
+      flex:1;  
+      min-width: 240px;  
+      border:1px solid var(--border);  
+      background: rgba(0,0,0,.18);  
+      color: var(--text);  
+      padding: 10px 12px;  
+      border-radius: 14px;  
+      outline:none;  
+    }  
+    .input:focus{border-color: rgba(123,220,255,.5)}  
+    .hint{color:var(--faint); font-size:12px; margin-top:8px}  
+    .results{  
+      margin-top:10px;  
+      display:grid; gap:10px;  
+    }  
+    .result{  
+      border:1px solid var(--border);  
+      background: rgba(14,22,48,.45);  
+      border-radius: 16px;  
+      padding: 12px;  
+    }  
+    .result h3{margin:0 0 6px; font-size:13px}  
+    .result p{margin:0; color:var(--muted); font-size:12px; line-height:1.55}  
+    .badge{  
+      display:inline-flex; align-items:center; gap:6px;  
+      padding:6px 8px;  
+      border-radius:999px;  
+      border:1px solid var(--border);  
+      background: rgba(255,255,255,.05);  
+      font-size:11px; color:var(--muted);  
+      margin-right:6px;  
+    }  
+  
+    /* =========================================================  
+      TOOLTIP: Parallax Sections  
+      - What: Long-form reading lanes with subtle motion for “living document” feel  
+      - How: scroll -> JS updates CSS variables used by backgrounds  
+      - Outcome: Engaging, readable policy narrative without external deps  
+    ========================================================== */  
+    .lane{  
+      margin-top:16px;  
+      border:1px solid var(--border);  
+      background: linear-gradient(180deg, rgba(14,22,48,.62), rgba(11,19,43,.48));  
+      border-radius: var(--r20);  
+      overflow:hidden;  
+      box-shadow: var(--shadow);  
+      position:relative;  
+    }  
+    .laneHeader{  
+      padding: 16px 16px 10px;  
+      border-bottom:1px solid var(--border);  
+      display:flex; gap:10px; align-items:flex-start; justify-content:space-between; flex-wrap:wrap;  
+    }  
+    .laneHeader h2{margin:0; font-size:14px}  
+    .laneHeader .meta{color:var(--muted); font-size:12px}  
+    .laneBody{padding: 12px 16px 16px; color:var(--muted); line-height:1.62}  
+    .laneBody h3{color:var(--text); margin: 14px 0 6px; font-size:13px}  
+    .laneBody .note{  
+      border-left: 3px solid rgba(123,220,255,.55);  
+      padding:10px 12px;  
+      margin: 10px 0;  
+      background: rgba(0,0,0,.16);  
+      border-radius: 12px;  
+    }  
+    .laneBody .warn{  
+      border-left-color: rgba(255,211,106,.65);  
+    }  
+    .laneBody .danger{  
+      border-left-color: rgba(255,107,139,.65);  
+    }  
+    .laneBg{  
+      position:absolute; inset:-2px;  
+      background:  
+        radial-gradient(800px 240px at calc(20% + var(--px,0px)) calc(10% + var(--py,0px)), rgba(123,220,255,.16), transparent 60%),  
+        radial-gradient(760px 280px at calc(70% - var(--px,0px)) calc(30% + var(--py,0px)), rgba(183,255,106,.10), transparent 62%),  
+        radial-gradient(700px 320px at calc(85% + var(--px,0px)) calc(90% - var(--py,0px)), rgba(255,107,139,.08), transparent 62%);  
+      pointer-events:none;  
+      filter:saturate(1.05);  
+    }  
+    .lane > *{position:relative}  
+  
+    /* =========================================================  
+      TOOLTIP: HUD + Constellation  
+      - What: Lightweight gamification + state visualizer for “progress through policy kit”  
+      - How: XP increases when you read/expand sections + export a module  
+      - Outcome: Keeps long-form work moving without dark patterns  
+    ========================================================== */  
+    .hud{  
+      position:fixed; right:12px; bottom:12px; z-index:60;  
+      width: min(360px, calc(100vw - 24px));  
+      border:1px solid var(--border);  
+      background: rgba(7,10,20,.70);  
+      backdrop-filter: blur(10px);  
+      border-radius: 18px;  
+      box-shadow: var(--shadow);  
+      overflow:hidden;  
+    }  
+    .hudTop{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; border-bottom:1px solid var(--border)}  
+    .hudTop strong{font-size:12px}  
+    .hudTop span{color:var(--muted); font-size:12px}  
+    .hudBody{display:grid; grid-template-columns: 1fr 120px; gap:10px; padding:10px 12px}  
+    .barWrap{display:grid; gap:8px}  
+    .bar{  
+      height:10px; border-radius:999px; border:1px solid var(--border);  
+      background: rgba(255,255,255,.05); overflow:hidden;  
+    }  
+    .bar > i{display:block; height:100%; width: 0%; background: linear-gradient(90deg, rgba(123,220,255,.85), rgba(183,255,106,.75)); border-radius:999px}  
+    canvas{width:120px; height:120px; border-radius: 16px; border:1px solid var(--border); background: rgba(255,255,255,.03)}  
+    .hudBtns{display:flex; gap:8px; flex-wrap:wrap; margin-top:6px}  
+    .mini{padding:8px 10px; border-radius: 12px; font-size:12px}  
+    .hudSmall{color:var(--muted); font-size:11px; line-height:1.4}  
+    .hideHud{display:none}  
+    .hudToggle{  
+      position:fixed; right:12px; bottom:12px; z-index:61;  
+      display:none;  
+    }  
+  
+    /* =========================================================  
+      TOOLTIP: Splash Screen  
+      - What: Animated intro; can be closed immediately; auto-closes after 5s  
+      - How: JS toggles [data-splash="off"]  
+      - Outcome: Adds “product feel” without trapping the user  
+    ========================================================== */  
+    .splash{  
+      position:fixed; inset:0; z-index:100;  
+      background: radial-gradient(900px 600px at 20% 20%, rgba(123,220,255,.16), transparent 55%),  
+                  radial-gradient(900px 600px at 80% 40%, rgba(183,255,106,.10), transparent 55%),  
+                  linear-gradient(180deg, rgba(7,10,20,.96), rgba(11,16,32,.92));  
+      display:flex; align-items:center; justify-content:center;  
+      transition: opacity .25s ease, transform .25s ease;  
+    }  
+    body[data-splash="off"] .splash{opacity:0; pointer-events:none; transform: translateY(-6px)}  
+    .splashCard{  
+      width:min(820px, calc(100vw - 28px));  
+      border:1px solid var(--border);  
+      border-radius: 22px;  
+      background: rgba(14,22,48,.50);  
+      box-shadow: var(--shadow);  
+      padding: 18px;  
+      position:relative;  
+      overflow:hidden;  
+    }  
+    .splashCard:before{  
+      content:""; position:absolute; inset:-2px;  
+      background: conic-gradient(from 180deg, rgba(123,220,255,.0), rgba(123,220,255,.22), rgba(183,255,106,.16), rgba(255,107,139,.12), rgba(123,220,255,.0));  
+      animation: spin 12s linear infinite;  
+      opacity:.9;  
+    }  
+    .splashCard > *{position:relative}  
+    .splashTop{display:flex; align-items:flex-start; justify-content:space-between; gap:12px}  
+    .xclose{  
+      border:1px solid var(--border);  
+      background: rgba(0,0,0,.22);  
+      color:var(--text);  
+      width:36px; height:36px;  
+      border-radius: 14px;  
+      cursor:pointer;  
+      font-weight:900;  
+    }  
+    .splashTop h2{margin:0; font-size:16px}  
+    .splashTop p{margin:6px 0 0; color:var(--muted); line-height:1.55}  
+    .splashSteps{  
+      margin-top:12px;  
+      display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;  
+    }  
+    @media (max-width: 860px){ .splashSteps{grid-template-columns:1fr} }  
+    .step{  
+      border:1px solid var(--border);  
+      border-radius: 18px;  
+      background: rgba(0,0,0,.18);  
+      padding:12px;  
+    }  
+    .step b{display:block; margin-bottom:6px; font-size:12px}  
+    .step span{color:var(--muted); font-size:12px; line-height:1.5; display:block}  
+    .foot{  
+      margin-top:20px;  
+      border:1px solid var(--border);  
+      border-radius: 18px;  
+      background: rgba(14,22,48,.50);  
+      padding: 14px 16px;  
+      color:var(--muted);  
+    }  
+    footer{  
+      margin-top:16px;  
+      border-top:1px solid var(--border);  
+      padding-top:14px;  
+      color:var(--muted);  
+      font-size:12px;  
+      line-height:1.6;  
+    }  
+  
+    /* =========================================================  
+      TOOLTIP: Print Styles  
+      - What: Make this policy kit printable as a briefing pack  
+      - How: @media print removes HUD/splash and adjusts contrast  
+      - Outcome: “Real world” handout ready  
+    ========================================================== */  
+    @media print{  
+      .topbar, .hud, .hudToggle, .splash{display:none !important}  
+      body{background:#fff; color:#000}  
+      .hero, .card, .lane, details{box-shadow:none !important; background:#fff !important; border:1px solid #bbb !important}  
+      a{color:#000}  
+    }  
+  
+    /* Noscript */  
+    noscript .nojs{  
+      display:block;  
+      margin: 14px auto;  
+      max-width: var(--max);  
+      padding: 12px 14px;  
+      border:1px solid var(--border);  
+      border-radius: 16px;  
+      background: rgba(255,211,106,.10);  
+      color: var(--text);  
+    }  
+  </style>  </head>  <body>  
+  <div class="splash" role="dialog" aria-modal="true" aria-label="Welcome">  
+    <div class="splashCard">  
+      <div class="splashTop">  
+        <div>  
+          <h2>Northbound Mobility — Policy Kit (Offline-First)</h2>  
+          <p>  
+            This is a lawful, policy-focused blueprint for reducing wait times and friction for U.S. citizens entering Canada and (legally) working,  
+            while protecting program integrity and Canadian capacity. No hacks. No loophole fairy tales. 🧭  
+          </p>  
+        </div>  
+        <button class="xclose" id="splashClose" aria-label="Close splash">×</button>  
+      </div>  
+      <div class="splashSteps" aria-label="How to use">  
+        <div class="step"><b>1) Read the lanes</b><span>Each lane is a “module seed” for a separate sequential <span class="mono">index.html</span> file.</span></div>  
+        <div class="step"><b>2) Export modules</b><span>Use <span class="mono">Export Module</span> to generate the next file offline, complete with citations + structure.</span></div>  
+        <div class="step"><b>3) Iterate safely</b><span>Use the built-in question engine to surface policy gaps and options without sliding into coercion.</span></div>  
+      </div>  
+      <div class="hint">Auto-closes in 5 seconds. You can close now. ✅</div>  
+    </div>  
+  </div>    <noscript>  
+    <div class="nojs">  
+      <b>Noscript:</b> This page still reads fine, but exporting sequential files, search, and offline storage need JavaScript enabled.  
+      Nothing is sent anywhere either way.  
+    </div>  
+  </noscript>    <div class="topbar">  
+    <div class="topbarInner">  
+      <div class="brand" aria-label="Brand">  
+        <div class="sig" aria-hidden="true"></div>  
+        <div>  
+          <h1>Northbound Mobility • Policy Kit</h1>  
+          <p class="sub">Faster lawful entry + work pathways for U.S. citizens → Canada (offline-first briefing system)</p>  
+        </div>  
+      </div>  
+      <div class="controls" aria-label="Controls">  
+        <span class="pill" id="offlinePill">📦 Offline: <b class="mono" id="offlineState">checking…</b></span>  
+        <button class="btn secondary" id="toggleHudBtn" title="Hide/show HUD">HUD</button>  
+        <button class="btn good" id="exportBtn" title="Export the selected module as a standalone index.html">Export Module</button>  
+        <button class="btn warn" id="resetBtn" title="Reset local storage (IndexedDB)">Reset Local Data</button>  
+      </div>  
+    </div>  
+  </div>    <div class="wrap">  
+    <div class="grid">  
+      <section class="hero" aria-label="Overview">  
+        <p class="kicker">Multiphd policy approach • capacity-aware • integrity-preserving • bilateral realism 🧠</p>  
+        <h2 class="title">A pragmatic route to: “enter quickly, work legally, don’t overload systems”</h2>  
+        <p class="lead">  
+          The constraint-space is real: border processing capacity, housing strain, healthcare, labour needs, fraud pressure, and public trust.  
+          So this kit focuses on <b>faster lawful lanes</b> (that already exist), plus <b>policy levers</b> to reduce wait times without ripping safeguards out.  
+        </p>  
+        <div class="callouts">  
+          <span class="badge">🧾 Evidence hygiene</span>  
+          <span class="badge">🧰 Implementation-ready</span>  
+          <span class="badge">🛡️ Integrity guardrails</span>  
+          <span class="badge">🧊 Anti-panic design</span>  
+        </div>  
+        <div class="hr"></div>  
+        <div class="inputRow" aria-label="Search">  
+          <input class="input" id="searchBox" placeholder="Search this kit (e.g., CUSMA, LMIA, open work permit, Express Entry, eTA)" />  
+          <button class="btn mini" id="searchBtn" title="Search locally">Search</button>  
+          <button class="btn mini secondary" id="clearSearchBtn" title="Clear search">Clear</button>  
+        </div>  
+        <div class="hint">  
+          Local-only search across the embedded modules. No network calls. No logging.  
+        </div>  
+        <div class="results" id="searchResults" aria-live="polite"></div>  
+      </section>  <aside class="card" aria-label="Module selector and quick export">  
+    <h2>Sequential Files Plan (Module Seeds)</h2>  
+    <p class="muted small">  
+      This single page contains the “seed content” for a series of standalone <span class="mono">index.html</span> files.  
+      Pick a module → export → you get a clean file you can drop into a folder like <span class="mono">/policy/northbound-mobility/module-01/index.html</span>.  
+    </p>  
 
-  <!--
-    Zero-Harm & Anti-Inversion Note (Visible + Comment):
-    This policy kit supports lawful mobility, humane administration, and evidence-based redesign of entry/work processes.
-    It does NOT promote evasion, fraud, coercion, targeting, harassment, or any kind of illegal border activity.
-    No telemetry. No auto-send. Everything is stored locally (IndexedDB), user-controlled, and resettable.
-  -->
+    <div class="hr"></div>  
 
-  <style>
-    /* =========================================================
-      TOOLTIP: Design Tokens
-      - What: Global CSS variables controlling color, spacing, typography
-      - How: Edit :root to re-theme; all UI inherits from tokens
-      - Outcome: Consistent look + easy expansion across sequential files
-    ========================================================== */
-    :root{
-      --bg0:#070a14; --bg1:#0b1020; --bg2:#101a33;
-      --card:#0e1630cc; --card2:#0b132bcc;
-      --text:#eaf0ff; --muted:#b8c4e6;
-      --faint:#7f8ab0;
-      --accent:#7bdcff; --accent2:#b7ff6a; --warn:#ffd36a; --danger:#ff6b8b;
-      --border:rgba(130,160,255,.18);
-      --shadow: 0 18px 50px rgba(0,0,0,.45);
-      --r12:12px; --r16:16px; --r20:20px;
-      --pad:16px; --pad2:22px;
-      --max:1180px;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0; font-family:var(--sans); color:var(--text);
-      background:
-        radial-gradient(1200px 700px at 20% 10%, rgba(123,220,255,.18), transparent 55%),
-        radial-gradient(900px 700px at 80% 30%, rgba(183,255,106,.10), transparent 55%),
-        radial-gradient(900px 900px at 60% 90%, rgba(255,107,139,.08), transparent 55%),
-        linear-gradient(180deg, var(--bg0), var(--bg1) 35%, var(--bg2));
-      overflow-x:hidden;
-    }
-    a{color:inherit}
-    .wrap{max-width:var(--max); margin:0 auto; padding: 18px 14px 90px;}
-    .topbar{
-      position:sticky; top:0; z-index:50;
-      backdrop-filter: blur(10px);
-      background: linear-gradient(180deg, rgba(7,10,20,.88), rgba(7,10,20,.55));
-      border-bottom:1px solid var(--border);
-    }
-    .topbarInner{max-width:var(--max); margin:0 auto; padding: 10px 14px; display:flex; gap:12px; align-items:center; justify-content:space-between;}
-    .brand{display:flex; gap:10px; align-items:center;}
-    .sig{
-      width:38px; height:38px; border-radius:14px;
-      background: radial-gradient(circle at 30% 30%, rgba(123,220,255,.85), rgba(183,255,106,.35) 45%, rgba(255,107,139,.15) 70%, rgba(0,0,0,0) 74%),
-                  linear-gradient(135deg, rgba(123,220,255,.35), rgba(183,255,106,.22));
-      border:1px solid var(--border);
-      box-shadow: 0 12px 30px rgba(0,0,0,.35);
-      position:relative;
-      overflow:hidden;
-    }
-    .sig:after{
-      content:""; position:absolute; inset:-40%;
-      background: conic-gradient(from 90deg, rgba(123,220,255,.0), rgba(123,220,255,.35), rgba(183,255,106,.25), rgba(255,107,139,.18), rgba(123,220,255,.0));
-      animation: spin 10s linear infinite;
-    }
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .brand h1{margin:0; font-size:14px; letter-spacing:.2px}
-    .brand .sub{margin:0; color:var(--muted); font-size:12px}
-    .controls{display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end}
-    .btn{
-      appearance:none; border:1px solid var(--border); color:var(--text);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.10));
-      padding:10px 12px; border-radius:14px; cursor:pointer;
-      box-shadow: 0 10px 30px rgba(0,0,0,.25);
-      font-weight:700; font-size:12px;
-      transition: transform .08s ease, border-color .2s ease;
-    }
-    .btn:hover{transform: translateY(-1px); border-color: rgba(123,220,255,.45)}
-    .btn:active{transform: translateY(0)}
-    .btn.secondary{font-weight:650; opacity:.95}
-    .btn.good{border-color: rgba(183,255,106,.35)}
-    .btn.warn{border-color: rgba(255,211,106,.35)}
-    .btn.danger{border-color: rgba(255,107,139,.35)}
-    .pill{
-      display:inline-flex; gap:8px; align-items:center;
-      border:1px solid var(--border);
-      background: rgba(14,22,48,.55);
-      padding:8px 10px; border-radius:999px; color:var(--muted);
-      font-size:12px;
-    }
-    .grid{
-      display:grid; grid-template-columns: 1.05fr .95fr; gap:16px; align-items:start;
-      margin-top:18px;
-    }
-    @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
-    .hero{
-      border:1px solid var(--border);
-      background: linear-gradient(180deg, rgba(14,22,48,.72), rgba(11,19,43,.60));
-      border-radius: var(--r20);
-      padding: 18px 18px 14px;
-      box-shadow: var(--shadow);
-      position:relative;
-      overflow:hidden;
-    }
-    .hero:before{
-      content:""; position:absolute; inset:-2px;
-      background:
-        radial-gradient(700px 220px at 20% 15%, rgba(123,220,255,.18), transparent 60%),
-        radial-gradient(520px 260px at 70% 30%, rgba(183,255,106,.10), transparent 60%),
-        radial-gradient(520px 260px at 80% 90%, rgba(255,107,139,.09), transparent 60%);
-      pointer-events:none;
-    }
-    .hero > *{position:relative}
-    .kicker{color:var(--muted); font-size:13px; margin:0 0 8px}
-    .title{font-size:22px; margin:0 0 10px; letter-spacing:.1px}
-    .lead{color:var(--muted); line-height:1.55; margin:0 0 12px}
-    .callouts{display:flex; gap:10px; flex-wrap:wrap}
-    .card{
-      border:1px solid var(--border);
-      background: rgba(14,22,48,.56);
-      border-radius: var(--r20);
-      padding: var(--pad);
-      box-shadow: var(--shadow);
-    }
-    .card h2{margin:0 0 10px; font-size:14px; letter-spacing:.25px}
-    .muted{color:var(--muted)}
-    .small{font-size:12px}
-    .mono{font-family:var(--mono)}
-    .toc{
-      display:grid; gap:10px;
-    }
-    details{
-      border:1px solid var(--border);
-      background: rgba(11,19,43,.52);
-      border-radius: 16px;
-      padding: 10px 12px;
-    }
-    summary{
-      cursor:pointer;
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
-      font-weight:800;
-      list-style:none;
-    }
-    summary::-webkit-details-marker{display:none}
-    .tag{
-      font-size:11px; color:var(--muted);
-      border:1px solid var(--border);
-      border-radius:999px; padding:6px 8px;
-      background: rgba(255,255,255,.04);
-      white-space:nowrap;
-    }
-    .content{padding:10px 2px 2px; color:var(--muted); line-height:1.6}
-    .content ul{margin:8px 0 0 18px}
-    .content li{margin:7px 0}
-    .hr{height:1px; background: var(--border); margin: 14px 0}
-    .inputRow{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
-    .input{
-      flex:1;
-      min-width: 240px;
-      border:1px solid var(--border);
-      background: rgba(0,0,0,.18);
-      color: var(--text);
-      padding: 10px 12px;
-      border-radius: 14px;
-      outline:none;
-    }
-    .input:focus{border-color: rgba(123,220,255,.5)}
-    .hint{color:var(--faint); font-size:12px; margin-top:8px}
-    .results{
-      margin-top:10px;
-      display:grid; gap:10px;
-    }
-    .result{
-      border:1px solid var(--border);
-      background: rgba(14,22,48,.45);
-      border-radius: 16px;
-      padding: 12px;
-    }
-    .result h3{margin:0 0 6px; font-size:13px}
-    .result p{margin:0; color:var(--muted); font-size:12px; line-height:1.55}
-    .badge{
-      display:inline-flex; align-items:center; gap:6px;
-      padding:6px 8px;
-      border-radius:999px;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.05);
-      font-size:11px; color:var(--muted);
-      margin-right:6px;
-    }
+    <div class="toc" id="toc">  
+      <!-- details blocks injected by JS -->  
+    </div>  
 
-    /* =========================================================
-      TOOLTIP: Parallax Sections
-      - What: Long-form reading lanes with subtle motion for “living document” feel
-      - How: scroll -> JS updates CSS variables used by backgrounds
-      - Outcome: Engaging, readable policy narrative without external deps
-    ========================================================== */
-    .lane{
-      margin-top:16px;
-      border:1px solid var(--border);
-      background: linear-gradient(180deg, rgba(14,22,48,.62), rgba(11,19,43,.48));
-      border-radius: var(--r20);
-      overflow:hidden;
-      box-shadow: var(--shadow);
-      position:relative;
-    }
-    .laneHeader{
-      padding: 16px 16px 10px;
-      border-bottom:1px solid var(--border);
-      display:flex; gap:10px; align-items:flex-start; justify-content:space-between; flex-wrap:wrap;
-    }
-    .laneHeader h2{margin:0; font-size:14px}
-    .laneHeader .meta{color:var(--muted); font-size:12px}
-    .laneBody{padding: 12px 16px 16px; color:var(--muted); line-height:1.62}
-    .laneBody h3{color:var(--text); margin: 14px 0 6px; font-size:13px}
-    .laneBody .note{
-      border-left: 3px solid rgba(123,220,255,.55);
-      padding:10px 12px;
-      margin: 10px 0;
-      background: rgba(0,0,0,.16);
-      border-radius: 12px;
-    }
-    .laneBody .warn{
-      border-left-color: rgba(255,211,106,.65);
-    }
-    .laneBody .danger{
-      border-left-color: rgba(255,107,139,.65);
-    }
-    .laneBg{
-      position:absolute; inset:-2px;
-      background:
-        radial-gradient(800px 240px at calc(20% + var(--px,0px)) calc(10% + var(--py,0px)), rgba(123,220,255,.16), transparent 60%),
-        radial-gradient(760px 280px at calc(70% - var(--px,0px)) calc(30% + var(--py,0px)), rgba(183,255,106,.10), transparent 62%),
-        radial-gradient(700px 320px at calc(85% + var(--px,0px)) calc(90% - var(--py,0px)), rgba(255,107,139,.08), transparent 62%);
-      pointer-events:none;
-      filter:saturate(1.05);
-    }
-    .lane > *{position:relative}
+    <div class="hr"></div>  
 
-    /* =========================================================
-      TOOLTIP: HUD + Constellation
-      - What: Lightweight gamification + state visualizer for “progress through policy kit”
-      - How: XP increases when you read/expand sections + export a module
-      - Outcome: Keeps long-form work moving without dark patterns
-    ========================================================== */
-    .hud{
-      position:fixed; right:12px; bottom:12px; z-index:60;
-      width: min(360px, calc(100vw - 24px));
-      border:1px solid var(--border);
-      background: rgba(7,10,20,.70);
-      backdrop-filter: blur(10px);
-      border-radius: 18px;
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-    .hudTop{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; border-bottom:1px solid var(--border)}
-    .hudTop strong{font-size:12px}
-    .hudTop span{color:var(--muted); font-size:12px}
-    .hudBody{display:grid; grid-template-columns: 1fr 120px; gap:10px; padding:10px 12px}
-    .barWrap{display:grid; gap:8px}
-    .bar{
-      height:10px; border-radius:999px; border:1px solid var(--border);
-      background: rgba(255,255,255,.05); overflow:hidden;
-    }
-    .bar > i{display:block; height:100%; width: 0%; background: linear-gradient(90deg, rgba(123,220,255,.85), rgba(183,255,106,.75)); border-radius:999px}
-    canvas{width:120px; height:120px; border-radius: 16px; border:1px solid var(--border); background: rgba(255,255,255,.03)}
-    .hudBtns{display:flex; gap:8px; flex-wrap:wrap; margin-top:6px}
-    .mini{padding:8px 10px; border-radius: 12px; font-size:12px}
-    .hudSmall{color:var(--muted); font-size:11px; line-height:1.4}
-    .hideHud{display:none}
-    .hudToggle{
-      position:fixed; right:12px; bottom:12px; z-index:61;
-      display:none;
-    }
+    <div class="small muted">  
+      <b>Sources (official):</b><br/>  
+      • U.S. citizens are exempt from eTA requirements (still need valid ID, e.g., U.S. passport). 0<br/>  
+      • Work permit baseline eligibility factors (leave at expiry, funds, security, etc.). 1<br/>  
+      • Free trade agreement work lanes (Canada.ca tool/overview). 2<br/>  
+      • Express Entry category-based selection overview + categories. 3<br/>  
+      • Francophone Mobility (LMIA-exempt pathway outside Quebec). 4<br/>  
+      • Employer compliance fee (IMP) basics (for employers). 5<br/>  
+      • 2026–2028 levels supplementary info (system context). 6  
+    </div>  
+  </aside>  
+</div>  
 
-    /* =========================================================
-      TOOLTIP: Splash Screen
-      - What: Animated intro; can be closed immediately; auto-closes after 5s
-      - How: JS toggles [data-splash="off"]
-      - Outcome: Adds “product feel” without trapping the user
-    ========================================================== */
-    .splash{
-      position:fixed; inset:0; z-index:100;
-      background: radial-gradient(900px 600px at 20% 20%, rgba(123,220,255,.16), transparent 55%),
-                  radial-gradient(900px 600px at 80% 40%, rgba(183,255,106,.10), transparent 55%),
-                  linear-gradient(180deg, rgba(7,10,20,.96), rgba(11,16,32,.92));
-      display:flex; align-items:center; justify-content:center;
-      transition: opacity .25s ease, transform .25s ease;
-    }
-    body[data-splash="off"] .splash{opacity:0; pointer-events:none; transform: translateY(-6px)}
-    .splashCard{
-      width:min(820px, calc(100vw - 28px));
-      border:1px solid var(--border);
-      border-radius: 22px;
-      background: rgba(14,22,48,.50);
-      box-shadow: var(--shadow);
-      padding: 18px;
-      position:relative;
-      overflow:hidden;
-    }
-    .splashCard:before{
-      content:""; position:absolute; inset:-2px;
-      background: conic-gradient(from 180deg, rgba(123,220,255,.0), rgba(123,220,255,.22), rgba(183,255,106,.16), rgba(255,107,139,.12), rgba(123,220,255,.0));
-      animation: spin 12s linear infinite;
-      opacity:.9;
-    }
-    .splashCard > *{position:relative}
-    .splashTop{display:flex; align-items:flex-start; justify-content:space-between; gap:12px}
-    .xclose{
-      border:1px solid var(--border);
-      background: rgba(0,0,0,.22);
-      color:var(--text);
-      width:36px; height:36px;
-      border-radius: 14px;
-      cursor:pointer;
-      font-weight:900;
-    }
-    .splashTop h2{margin:0; font-size:16px}
-    .splashTop p{margin:6px 0 0; color:var(--muted); line-height:1.55}
-    .splashSteps{
-      margin-top:12px;
-      display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;
-    }
-    @media (max-width: 860px){ .splashSteps{grid-template-columns:1fr} }
-    .step{
-      border:1px solid var(--border);
-      border-radius: 18px;
-      background: rgba(0,0,0,.18);
-      padding:12px;
-    }
-    .step b{display:block; margin-bottom:6px; font-size:12px}
-    .step span{color:var(--muted); font-size:12px; line-height:1.5; display:block}
-    .foot{
-      margin-top:20px;
-      border:1px solid var(--border);
-      border-radius: 18px;
-      background: rgba(14,22,48,.50);
-      padding: 14px 16px;
-      color:var(--muted);
-    }
-    footer{
-      margin-top:16px;
-      border-top:1px solid var(--border);
-      padding-top:14px;
-      color:var(--muted);
-      font-size:12px;
-      line-height:1.6;
-    }
+<!-- ===================== LONG-FORM LANES ===================== -->  
 
-    /* =========================================================
-      TOOLTIP: Print Styles
-      - What: Make this policy kit printable as a briefing pack
-      - How: @media print removes HUD/splash and adjusts contrast
-      - Outcome: “Real world” handout ready
-    ========================================================== */
-    @media print{
-      .topbar, .hud, .hudToggle, .splash{display:none !important}
-      body{background:#fff; color:#000}
-      .hero, .card, .lane, details{box-shadow:none !important; background:#fff !important; border:1px solid #bbb !important}
-      a{color:#000}
-    }
+<section class="lane" id="lane0">  
+  <div class="laneBg" aria-hidden="true"></div>  
+  <div class="laneHeader">  
+    <div>  
+      <h2>Module 00 — The Frame: what “faster” means without breaking the system</h2>  
+      <div class="meta">Goal: speed + legality + capacity-fit • output: briefing narrative + definitions</div>  
+    </div>  
+    <span class="tag">Seed for file: module-00/index.html</span>  
+  </div>  
+  <div class="laneBody">  
+    <p class="note">  
+      <b>Definition:</b> “Help Americans enter Canada without lengthy wait times” has two very different meanings:  
+      (A) “shorter border line” and (B) “shorter total time to lawful work authorization and stability.”  
+      Border lines are a capacity + staffing problem; work authorization time is an administrative pipeline problem.  
+      This kit targets <b>(B)</b> primarily, because that’s where policy levers produce durable relief without turning ports of entry into chaos.  
+    </p>  
 
-    /* Noscript */
-    noscript .nojs{
-      display:block;
-      margin: 14px auto;
-      max-width: var(--max);
-      padding: 12px 14px;
-      border:1px solid var(--border);
-      border-radius: 16px;
-      background: rgba(255,211,106,.10);
-      color: var(--text);
-    }
-  </style>
-</head>
+    <h3>Design constraints (the universe’s annoying rules)</h3>  
+    <ul>  
+      <li><b>Integrity:</b> Any high-throughput lane attracts fraud. Build verification and enforcement that is humane but real.</li>  
+      <li><b>Capacity:</b> Housing, healthcare, schools, and municipal services are hard bottlenecks. You can’t “policy” your way around physics.</li>  
+      <li><b>Legality:</b> Working in Canada requires the correct authorization. Baseline eligibility includes demonstrating you’ll comply with the permit terms and other factors. 7</li>  
+      <li><b>Political sustainability:</b> Programs survive when they feel fair to residents and transparent to institutions.</li>  
+    </ul>  
 
-<body>
-  <div class="splash" role="dialog" aria-modal="true" aria-label="Welcome">
-    <div class="splashCard">
-      <div class="splashTop">
-        <div>
-          <h2>Northbound Mobility — Policy Kit (Offline-First)</h2>
-          <p>
-            This is a lawful, policy-focused blueprint for reducing wait times and friction for U.S. citizens entering Canada and (legally) working,
-            while protecting program integrity and Canadian capacity. No hacks. No loophole fairy tales. 🧭
-          </p>
-        </div>
-        <button class="xclose" id="splashClose" aria-label="Close splash">×</button>
-      </div>
-      <div class="splashSteps" aria-label="How to use">
-        <div class="step"><b>1) Read the lanes</b><span>Each lane is a “module seed” for a separate sequential <span class="mono">index.html</span> file.</span></div>
-        <div class="step"><b>2) Export modules</b><span>Use <span class="mono">Export Module</span> to generate the next file offline, complete with citations + structure.</span></div>
-        <div class="step"><b>3) Iterate safely</b><span>Use the built-in question engine to surface policy gaps and options without sliding into coercion.</span></div>
-      </div>
-      <div class="hint">Auto-closes in 5 seconds. You can close now. ✅</div>
-    </div>
-  </div>
+    <h3>Operational metric: “time-to-lawful-work” (TLW)</h3>  
+    <p class="note">  
+      Your north star metric shouldn’t be “how fast someone crosses a border.” It should be:  
+      <b>TLW = time from intent → correct work authorization → first lawful paycheque</b>.  
+      That’s where reforms can cut weeks/months.  
+    </p>  
 
-  <noscript>
-    <div class="nojs">
-      <b>Noscript:</b> This page still reads fine, but exporting sequential files, search, and offline storage need JavaScript enabled.
-      Nothing is sent anywhere either way.
-    </div>
-  </noscript>
+    <h3>Policy posture: expand lawful lanes, don’t invent magical ones</h3>  
+    <p>  
+      Canada already has: free trade agreement work lanes (for certain roles), employer-led pathways (LMIA and LMIA-exempt),  
+      and permanent pathways (Express Entry and others). 8  
+      A “revamp” that works usually means: simplify eligibility proofs, digitize steps, triage by risk, and reduce redundant paperwork.  
+    </p>  
 
-  <div class="topbar">
-    <div class="topbarInner">
-      <div class="brand" aria-label="Brand">
-        <div class="sig" aria-hidden="true"></div>
-        <div>
-          <h1>Northbound Mobility • Policy Kit</h1>
-          <p class="sub">Faster lawful entry + work pathways for U.S. citizens → Canada (offline-first briefing system)</p>
-        </div>
-      </div>
-      <div class="controls" aria-label="Controls">
-        <span class="pill" id="offlinePill">📦 Offline: <b class="mono" id="offlineState">checking…</b></span>
-        <button class="btn secondary" id="toggleHudBtn" title="Hide/show HUD">HUD</button>
-        <button class="btn good" id="exportBtn" title="Export the selected module as a standalone index.html">Export Module</button>
-        <button class="btn warn" id="resetBtn" title="Reset local storage (IndexedDB)">Reset Local Data</button>
-      </div>
-    </div>
-  </div>
+    <div class="note warn">  
+      <b>Zero-harm guardrail:</b> This kit is explicitly <b>not</b> about exploiting disasters, panic-migrating, or bypassing rules.  
+      It’s about building a humane, legal high-throughput lane that remains stable under stress.  
+    </div>  
+  </div>  
+</section>  
 
-  <div class="wrap">
-    <div class="grid">
-      <section class="hero" aria-label="Overview">
-        <p class="kicker">Multiphd policy approach • capacity-aware • integrity-preserving • bilateral realism 🧠</p>
-        <h2 class="title">A pragmatic route to: “enter quickly, work legally, don’t overload systems”</h2>
-        <p class="lead">
-          The constraint-space is real: border processing capacity, housing strain, healthcare, labour needs, fraud pressure, and public trust.
-          So this kit focuses on <b>faster lawful lanes</b> (that already exist), plus <b>policy levers</b> to reduce wait times without ripping safeguards out.
-        </p>
-        <div class="callouts">
-          <span class="badge">🧾 Evidence hygiene</span>
-          <span class="badge">🧰 Implementation-ready</span>
-          <span class="badge">🛡️ Integrity guardrails</span>
-          <span class="badge">🧊 Anti-panic design</span>
-        </div>
-        <div class="hr"></div>
-        <div class="inputRow" aria-label="Search">
-          <input class="input" id="searchBox" placeholder="Search this kit (e.g., CUSMA, LMIA, open work permit, Express Entry, eTA)" />
-          <button class="btn mini" id="searchBtn" title="Search locally">Search</button>
-          <button class="btn mini secondary" id="clearSearchBtn" title="Clear search">Clear</button>
-        </div>
-        <div class="hint">
-          Local-only search across the embedded modules. No network calls. No logging.
-        </div>
-        <div class="results" id="searchResults" aria-live="polite"></div>
-      </section>
+<section class="lane" id="lane1">  
+  <div class="laneBg" aria-hidden="true"></div>  
+  <div class="laneHeader">  
+    <div>  
+      <h2>Module 01 — Entry Reality Check: “Visit” ≠ “Work” (and what U.S. citizens actually need)</h2>  
+      <div class="meta">Goal: correct misconceptions early • output: clean public-facing explainer</div>  
+    </div>  
+    <span class="tag">Seed for file: module-01/index.html</span>  
+  </div>  
+  <div class="laneBody">  
+    <h3>U.S. citizen entry basics (air vs. land)</h3>  
+    <p class="note">  
+      U.S. citizens are exempt from the electronic Travel Authorization (eTA) requirement, but still need proper identification (e.g., a valid U.S. passport). 9  
+      This matters because a lot of “wait time” pain comes from people arriving without clear documentation or purpose.  
+    </p>  
 
-      <aside class="card" aria-label="Module selector and quick export">
-        <h2>Sequential Files Plan (Module Seeds)</h2>
-        <p class="muted small">
-          This single page contains the “seed content” for a series of standalone <span class="mono">index.html</span> files.
-          Pick a module → export → you get a clean file you can drop into a folder like <span class="mono">/policy/northbound-mobility/module-01/index.html</span>.
-        </p>
+    <h3>Working requires authorization (and baseline eligibility is predictable)</h3>  
+    <p>  
+      Canada’s baseline work permit eligibility includes proving you’ll comply with permit conditions, showing sufficient funds, and meeting security/health requirements where applicable. 10  
+      A policy kit that wants to speed processing should standardize and pre-validate these proofs before the worker ever shows up.  
+    </p>  
 
-        <div class="hr"></div>
+    <h3>Core idea: pre-clearance for “intent to work” documentation</h3>  
+    <div class="note">  
+      <b>Proposal (administrative):</b> A voluntary pre-clearance package for U.S. citizens intending to work:  
+      identity + qualifications + offer details + funds + background attestations, validated digitally.  
+      This doesn’t change the law; it changes the friction.  
+    </div>  
 
-        <div class="toc" id="toc">
-          <!-- details blocks injected by JS -->
-        </div>
+    <div class="note warn">  
+      <b>What not to do:</b> Encourage people to “enter as visitors and figure it out later.”  
+      That raises refusal risk and increases officer burden, which can worsen wait times for everyone.  
+    </div>  
+  </div>  
+</section>  
 
-        <div class="hr"></div>
+<section class="lane" id="lane2">  
+  <div class="laneBg" aria-hidden="true"></div>  
+  <div class="laneHeader">  
+    <div>  
+      <h2>Module 02 — Fastest lawful work lanes for many U.S. citizens (policy-makers’ map)</h2>  
+      <div class="meta">Goal: identify high-throughput pathways • output: “lane map” + decision logic</div>  
+    </div>  
+    <span class="tag">Seed for file: module-02/index.html</span>  
+  </div>  
+  <div class="laneBody">  
+    <h3>Lane A: Free trade agreement work authorization (where eligible)</h3>  
+    <p class="note">  
+      Canada provides work pathways “under a free trade agreement” for certain categories of business people. 11  
+      Policy lever: build a U.S.-facing “role translator” that maps common American job titles to eligible categories with required proofs.  
+    </p>  
 
-        <div class="small muted">
-          <b>Sources (official):</b><br/>
-          • U.S. citizens are exempt from eTA requirements (still need valid ID, e.g., U.S. passport). 0<br/>
-          • Work permit baseline eligibility factors (leave at expiry, funds, security, etc.). 1<br/>
-          • Free trade agreement work lanes (Canada.ca tool/overview). 2<br/>
-          • Express Entry category-based selection overview + categories. 3<br/>
-          • Francophone Mobility (LMIA-exempt pathway outside Quebec). 4<br/>
-          • Employer compliance fee (IMP) basics (for employers). 5<br/>
-          • 2026–2028 levels supplementary info (system context). 6
-        </div>
-      </aside>
-    </div>
+    <h3>Lane B: LMIA-exempt options (reduce employer friction)</h3>  
+    <p>  
+      Some employer routes are LMIA-exempt (International Mobility Program), which involves employer compliance steps/fees in many cases. 12  
+      Policy lever: simplify compliance UX, automate validation, and support small employers so they don’t avoid hiring due to paperwork dread.  
+    </p>  
 
-    <!-- ===================== LONG-FORM LANES ===================== -->
+    <h3>Lane C: Francophone Mobility (outside Quebec)</h3>  
+    <p class="note">  
+      The Francophone Mobility work permit is designed to make it easier for employers to hire without an LMIA if requirements are met and the job is outside Quebec. 13  
+      Policy lever: invest in rapid French upskilling pipelines for interested U.S. applicants, paired with employer matchmaking.  
+    </p>  
 
-    <section class="lane" id="lane0">
-      <div class="laneBg" aria-hidden="true"></div>
-      <div class="laneHeader">
-        <div>
-          <h2>Module 00 — The Frame: what “faster” means without breaking the system</h2>
-          <div class="meta">Goal: speed + legality + capacity-fit • output: briefing narrative + definitions</div>
-        </div>
-        <span class="tag">Seed for file: module-00/index.html</span>
-      </div>
-      <div class="laneBody">
-        <p class="note">
-          <b>Definition:</b> “Help Americans enter Canada without lengthy wait times” has two very different meanings:
-          (A) “shorter border line” and (B) “shorter total time to lawful work authorization and stability.”
-          Border lines are a capacity + staffing problem; work authorization time is an administrative pipeline problem.
-          This kit targets <b>(B)</b> primarily, because that’s where policy levers produce durable relief without turning ports of entry into chaos.
-        </p>
+    <h3>Lane D: Permanent pathways and category-based selection</h3>  
+    <p>  
+      Express Entry includes category-based selection (e.g., healthcare, STEM, trades, agriculture/agri-food, education, French-language proficiency, and more). 14  
+      Policy lever: align intake messaging with the categories Canada is actively using, and build transparent timelines so people choose the right lane.  
+    </p>  
 
-        <h3>Design constraints (the universe’s annoying rules)</h3>
-        <ul>
-          <li><b>Integrity:</b> Any high-throughput lane attracts fraud. Build verification and enforcement that is humane but real.</li>
-          <li><b>Capacity:</b> Housing, healthcare, schools, and municipal services are hard bottlenecks. You can’t “policy” your way around physics.</li>
-          <li><b>Legality:</b> Working in Canada requires the correct authorization. Baseline eligibility includes demonstrating you’ll comply with the permit terms and other factors. 7</li>
-          <li><b>Political sustainability:</b> Programs survive when they feel fair to residents and transparent to institutions.</li>
-        </ul>
+    <div class="note warn">  
+      <b>Policy-maker takeaway:</b> The fastest “revamp” is often not a new program—it's an <b>orchestrated on-ramp</b>:  
+      pre-validation + lane triage + employer enablement + clear routing into existing programs.  
+    </div>  
+  </div>  
+</section>  
 
-        <h3>Operational metric: “time-to-lawful-work” (TLW)</h3>
-        <p class="note">
-          Your north star metric shouldn’t be “how fast someone crosses a border.” It should be:
-          <b>TLW = time from intent → correct work authorization → first lawful paycheque</b>.
-          That’s where reforms can cut weeks/months.
-        </p>
+<section class="lane" id="lane3">  
+  <div class="laneBg" aria-hidden="true"></div>  
+  <div class="laneHeader">  
+    <div>  
+      <h2>Module 03 — Cutting wait times: the boring (effective) mechanics</h2>  
+      <div class="meta">Goal: queue theory + risk triage • output: implementation checklist</div>  
+    </div>  
+    <span class="tag">Seed for file: module-03/index.html</span>  
+  </div>  
+  <div class="laneBody">  
+    <h3>Wait time is usually a queue design problem</h3>  
+    <p>  
+      Most processing delays are some mix of: missing documents, unclear eligibility, redundant reviews, and high variance cases clogging the pipe.  
+      The solution pattern is: <b>front-load validation</b>, then <b>triage by risk</b>.  
+    </p>  
 
-        <h3>Policy posture: expand lawful lanes, don’t invent magical ones</h3>
-        <p>
-          Canada already has: free trade agreement work lanes (for certain roles), employer-led pathways (LMIA and LMIA-exempt),
-          and permanent pathways (Express Entry and others). 8
-          A “revamp” that works usually means: simplify eligibility proofs, digitize steps, triage by risk, and reduce redundant paperwork.
-        </p>
+    <h3>Policy levers that reduce variance</h3>  
+    <ul>  
+      <li><b>Standardized evidence packs</b> for U.S. applicants (identity, qualifications, offer, funds, background attestations).</li>  
+      <li><b>Employer enablement</b>: small firms get guided compliance steps; large firms get API-friendly bulk submissions (no dark patterns).</li>  
+      <li><b>Decision transparency</b>: publish what causes delays and how to avoid them (reduces rework).</li>  
+      <li><b>Harmonized intake</b>: one intake questionnaire routes into the correct existing lane (free trade agreement lane, LMIA-exempt, PR track, etc.). 15</li>  
+    </ul>  
 
-        <div class="note warn">
-          <b>Zero-harm guardrail:</b> This kit is explicitly <b>not</b> about exploiting disasters, panic-migrating, or bypassing rules.
-          It’s about building a humane, legal high-throughput lane that remains stable under stress.
-        </div>
-      </div>
-    </section>
+    <div class="note">  
+      <b>Integrity guardrail:</b> Faster processing must not mean “less verification.” It means <b>verification done earlier</b> and <b>more predictably</b>.  
+    </div>  
 
-    <section class="lane" id="lane1">
-      <div class="laneBg" aria-hidden="true"></div>
-      <div class="laneHeader">
-        <div>
-          <h2>Module 01 — Entry Reality Check: “Visit” ≠ “Work” (and what U.S. citizens actually need)</h2>
-          <div class="meta">Goal: correct misconceptions early • output: clean public-facing explainer</div>
-        </div>
-        <span class="tag">Seed for file: module-01/index.html</span>
-      </div>
-      <div class="laneBody">
-        <h3>U.S. citizen entry basics (air vs. land)</h3>
-        <p class="note">
-          U.S. citizens are exempt from the electronic Travel Authorization (eTA) requirement, but still need proper identification (e.g., a valid U.S. passport). 9
-          This matters because a lot of “wait time” pain comes from people arriving without clear documentation or purpose.
-        </p>
+    <div class="note warn">  
+      <b>Fraud pressure is real:</b> some streams get suspended when misrepresentation rises.  
+      Design the “fast lane” with audits and consequences that are proportional, reviewable, and humane.  
+    </div>  
+  </div>  
+</section>  
 
-        <h3>Working requires authorization (and baseline eligibility is predictable)</h3>
-        <p>
-          Canada’s baseline work permit eligibility includes proving you’ll comply with permit conditions, showing sufficient funds, and meeting security/health requirements where applicable. 10
-          A policy kit that wants to speed processing should standardize and pre-validate these proofs before the worker ever shows up.
-        </p>
+<section class="lane" id="lane4">  
+  <div class="laneBg" aria-hidden="true"></div>  
+  <div class="laneHeader">  
+    <div>  
+      <h2>Module 04 — A capacity-aware “Northbound Mobility” program concept (optional, additive)</h2>  
+      <div class="meta">Goal: a new program sketch that doesn’t blow up housing/services • output: concept note</div>  
+    </div>  
+    <span class="tag">Seed for file: module-04/index.html</span>  
+  </div>  
+  <div class="laneBody">  
+    <p class="note">  
+      The safest “new program” concept is one that is <b>additive</b> (improves routing into existing lanes)  
+      and <b>capacity-aware</b> (ties intake to real service capacity and labour demand).  
+    </p>  
 
-        <h3>Core idea: pre-clearance for “intent to work” documentation</h3>
-        <div class="note">
-          <b>Proposal (administrative):</b> A voluntary pre-clearance package for U.S. citizens intending to work:
-          identity + qualifications + offer details + funds + background attestations, validated digitally.
-          This doesn’t change the law; it changes the friction.
-        </div>
+    <h3>Concept: triaged intake + destination matching</h3>  
+    <ul>  
+      <li><b>Eligibility triage</b>: route applicants to existing legal lanes based on role, region, language, and employer readiness.</li>  
+      <li><b>Destination matching</b>: prefer regions with verified housing capacity + labour demand + local support partners.</li>  
+      <li><b>Time-to-lawful-work (TLW)</b> targets: publish realistic service standards for each lane.</li>  
+    </ul>  
 
-        <div class="note warn">
-          <b>What not to do:</b> Encourage people to “enter as visitors and figure it out later.”
-          That raises refusal risk and increases officer burden, which can worsen wait times for everyone.
-        </div>
-      </div>
-    </section>
+    <h3>Why this fits Canada’s stated system context</h3>  
+    <p>  
+      Canada’s immigration planning emphasizes categories and labour market needs in programs like Express Entry. 16  
+      A new intake layer can remain aligned by routing people into those already-defined categories rather than inventing parallel universes.  
+    </p>  
 
-    <section class="lane" id="lane2">
-      <div class="laneBg" aria-hidden="true"></div>
-      <div class="laneHeader">
-        <div>
-          <h2>Module 02 — Fastest lawful work lanes for many U.S. citizens (policy-makers’ map)</h2>
-          <div class="meta">Goal: identify high-throughput pathways • output: “lane map” + decision logic</div>
-        </div>
-        <span class="tag">Seed for file: module-02/index.html</span>
-      </div>
-      <div class="laneBody">
-        <h3>Lane A: Free trade agreement work authorization (where eligible)</h3>
-        <p class="note">
-          Canada provides work pathways “under a free trade agreement” for certain categories of business people. 11
-          Policy lever: build a U.S.-facing “role translator” that maps common American job titles to eligible categories with required proofs.
-        </p>
+    <div class="note danger">  
+      <b>Red line:</b> any program framed as “America is dying” will read as panic-migration policy and can backfire politically.  
+      Better frame: <b>lawful mobility + labour matching + humane administration</b>.  
+    </div>  
+  </div>  
+</section>  
 
-        <h3>Lane B: LMIA-exempt options (reduce employer friction)</h3>
-        <p>
-          Some employer routes are LMIA-exempt (International Mobility Program), which involves employer compliance steps/fees in many cases. 12
-          Policy lever: simplify compliance UX, automate validation, and support small employers so they don’t avoid hiring due to paperwork dread.
-        </p>
+<section class="lane" id="lane5">  
+  <div class="laneBg" aria-hidden="true"></div>  
+  <div class="laneHeader">  
+    <div>  
+      <h2>Module 05 — Question Engine: generate policy options without self-delusion</h2>  
+      <div class="meta">Goal: turn fuzzy intent into concrete, testable levers • output: reusable prompts</div>  
+    </div>  
+    <span class="tag">Seed for file: module-05/index.html</span>  
+  </div>  
+  <div class="laneBody">  
+    <p class="note">  
+      Policymaking fails in predictable ways: vague goals, no metrics, ignoring capacity, and ignoring incentives.  
+      This question engine is meant to force specificity while staying humane.  
+    </p>  
 
-        <h3>Lane C: Francophone Mobility (outside Quebec)</h3>
-        <p class="note">
-          The Francophone Mobility work permit is designed to make it easier for employers to hire without an LMIA if requirements are met and the job is outside Quebec. 13
-          Policy lever: invest in rapid French upskilling pipelines for interested U.S. applicants, paired with employer matchmaking.
-        </p>
+    <details>  
+      <summary>🧪 Questions that force clarity <span class="tag">click to expand</span></summary>  
+      <div class="content">  
+        <ul>  
+          <li><b>Metric:</b> Are we optimizing border wait times, processing timelines, or time-to-lawful-work (TLW)? Which one?</li>  
+          <li><b>Lane fit:</b> What % of intended workers can be routed into existing legal lanes (FTA, LMIA-exempt, PR categories)? 17</li>  
+          <li><b>Capacity:</b> What is the housing + healthcare absorption limit per region per quarter (not per year)?</li>  
+          <li><b>Integrity:</b> What audit rate deters fraud without punishing honest applicants?</li>  
+          <li><b>Equity:</b> How do we ensure Canadian workers and newcomers aren’t played against each other?</li>  
+          <li><b>UX:</b> What documents create the most “rework loops” and how can we standardize them?</li>  
+        </ul>  
+      </div>  
+    </details>  
 
-        <h3>Lane D: Permanent pathways and category-based selection</h3>
-        <p>
-          Express Entry includes category-based selection (e.g., healthcare, STEM, trades, agriculture/agri-food, education, French-language proficiency, and more). 14
-          Policy lever: align intake messaging with the categories Canada is actively using, and build transparent timelines so people choose the right lane.
-        </p>
+    <details>  
+      <summary>🧰 Policy lever library (non-exhaustive) <span class="tag">expand</span></summary>  
+      <div class="content">  
+        <ul>  
+          <li><b>Pre-validation portal</b> for U.S. applicants (document completeness scoring + lane recommendation).</li>  
+          <li><b>Employer enablement kit</b>: guided compliance, templated offers, and standardized job-duty mapping.</li>  
+          <li><b>Risk triage</b>: low-variance cases fast-tracked; high-variance cases handled by specialized teams.</li>  
+          <li><b>Transparency</b>: publish “top 10 delay causes” and how to avoid them (reduces repeated submissions).</li>  
+          <li><b>Regional throttles</b>: intake tuned to real capacity rather than vibes.</li>  
+        </ul>  
+      </div>  
+    </details>  
 
-        <div class="note warn">
-          <b>Policy-maker takeaway:</b> The fastest “revamp” is often not a new program—it's an <b>orchestrated on-ramp</b>:
-          pre-validation + lane triage + employer enablement + clear routing into existing programs.
-        </div>
-      </div>
-    </section>
+    <details>  
+      <summary>🛡️ Safety & legitimacy checks <span class="tag">expand</span></summary>  
+      <div class="content">  
+        <ul>  
+          <li>Does this change reduce incentives for misrepresentation?</li>  
+          <li>Does it reduce officer discretion burden by clarifying evidence?</li>  
+          <li>Can a journalist explain it in 90 seconds without it sounding like a cheat code?</li>  
+          <li>Would a court view it as consistent with due process and administrative fairness?</li>  
+        </ul>  
+      </div>  
+    </details>  
+  </div>  
+</section>  
 
-    <section class="lane" id="lane3">
-      <div class="laneBg" aria-hidden="true"></div>
-      <div class="laneHeader">
-        <div>
-          <h2>Module 03 — Cutting wait times: the boring (effective) mechanics</h2>
-          <div class="meta">Goal: queue theory + risk triage • output: implementation checklist</div>
-        </div>
-        <span class="tag">Seed for file: module-03/index.html</span>
-      </div>
-      <div class="laneBody">
-        <h3>Wait time is usually a queue design problem</h3>
-        <p>
-          Most processing delays are some mix of: missing documents, unclear eligibility, redundant reviews, and high variance cases clogging the pipe.
-          The solution pattern is: <b>front-load validation</b>, then <b>triage by risk</b>.
-        </p>
+<section class="lane" id="lane6">  
+  <div class="laneBg" aria-hidden="true"></div>  
+  <div class="laneHeader">  
+    <div>  
+      <h2>Module 06 — References, attributions, and “how to split into sequential files”</h2>  
+      <div class="meta">Goal: clean citations + packaging workflow • output: reusable footer block</div>  
+    </div>  
+    <span class="tag">Seed for file: module-06/index.html</span>  
+  </div>  
+  <div class="laneBody">  
+    <h3>Official references used in this kit</h3>  
+    <ul>  
+      <li>eTA eligibility: U.S. citizens exempt. 18</li>  
+      <li>Work permit eligibility baseline factors. 19</li>  
+      <li>Work in Canada under a free trade agreement. 20</li>  
+      <li>Express Entry category-based selection categories. 21</li>  
+      <li>Francophone Mobility work permit overview. 22</li>  
+      <li>Employer compliance fee (IMP) overview. 23</li>  
+      <li>Supplementary immigration levels info (2026–2028 context). 24</li>  
+    </ul>  
 
-        <h3>Policy levers that reduce variance</h3>
-        <ul>
-          <li><b>Standardized evidence packs</b> for U.S. applicants (identity, qualifications, offer, funds, background attestations).</li>
-          <li><b>Employer enablement</b>: small firms get guided compliance steps; large firms get API-friendly bulk submissions (no dark patterns).</li>
-          <li><b>Decision transparency</b>: publish what causes delays and how to avoid them (reduces rework).</li>
-          <li><b>Harmonized intake</b>: one intake questionnaire routes into the correct existing lane (free trade agreement lane, LMIA-exempt, PR track, etc.). 15</li>
-        </ul>
+    <h3>Attributions & licensing</h3>  
+    <p class="note">  
+      This page uses common open web UI patterns (sticky header, details/summary accordions, local-first storage).  
+      No proprietary code copied. You can license your exported files however you want; consider a license that matches your deployment goals and public-interest intent.  
+    </p>  
 
-        <div class="note">
-          <b>Integrity guardrail:</b> Faster processing must not mean “less verification.” It means <b>verification done earlier</b> and <b>more predictably</b>.
-        </div>
+    <h3>How export works</h3>  
+    <p>  
+      When you click <b>Export Module</b>, this page generates a new standalone <span class="mono">index.html</span> containing:  
+      (1) selected module content, (2) the same offline storage + HUD framework, and (3) a minimal TOC for the remaining modules.  
+      You can repeat to build the whole sequence.  
+    </p>  
+  </div>  
+</section>  
 
-        <div class="note warn">
-          <b>Fraud pressure is real:</b> some streams get suspended when misrepresentation rises.
-          Design the “fast lane” with audits and consequences that are proportional, reviewable, and humane.
-        </div>
-      </div>
-    </section>
-
-    <section class="lane" id="lane4">
-      <div class="laneBg" aria-hidden="true"></div>
-      <div class="laneHeader">
-        <div>
-          <h2>Module 04 — A capacity-aware “Northbound Mobility” program concept (optional, additive)</h2>
-          <div class="meta">Goal: a new program sketch that doesn’t blow up housing/services • output: concept note</div>
-        </div>
-        <span class="tag">Seed for file: module-04/index.html</span>
-      </div>
-      <div class="laneBody">
-        <p class="note">
-          The safest “new program” concept is one that is <b>additive</b> (improves routing into existing lanes)
-          and <b>capacity-aware</b> (ties intake to real service capacity and labour demand).
-        </p>
-
-        <h3>Concept: triaged intake + destination matching</h3>
-        <ul>
-          <li><b>Eligibility triage</b>: route applicants to existing legal lanes based on role, region, language, and employer readiness.</li>
-          <li><b>Destination matching</b>: prefer regions with verified housing capacity + labour demand + local support partners.</li>
-          <li><b>Time-to-lawful-work (TLW)</b> targets: publish realistic service standards for each lane.</li>
-        </ul>
-
-        <h3>Why this fits Canada’s stated system context</h3>
-        <p>
-          Canada’s immigration planning emphasizes categories and labour market needs in programs like Express Entry. 16
-          A new intake layer can remain aligned by routing people into those already-defined categories rather than inventing parallel universes.
-        </p>
-
-        <div class="note danger">
-          <b>Red line:</b> any program framed as “America is dying” will read as panic-migration policy and can backfire politically.
-          Better frame: <b>lawful mobility + labour matching + humane administration</b>.
-        </div>
-      </div>
-    </section>
-
-    <section class="lane" id="lane5">
-      <div class="laneBg" aria-hidden="true"></div>
-      <div class="laneHeader">
-        <div>
-          <h2>Module 05 — Question Engine: generate policy options without self-delusion</h2>
-          <div class="meta">Goal: turn fuzzy intent into concrete, testable levers • output: reusable prompts</div>
-        </div>
-        <span class="tag">Seed for file: module-05/index.html</span>
-      </div>
-      <div class="laneBody">
-        <p class="note">
-          Policymaking fails in predictable ways: vague goals, no metrics, ignoring capacity, and ignoring incentives.
-          This question engine is meant to force specificity while staying humane.
-        </p>
-
-        <details>
-          <summary>🧪 Questions that force clarity <span class="tag">click to expand</span></summary>
-          <div class="content">
-            <ul>
-              <li><b>Metric:</b> Are we optimizing border wait times, processing timelines, or time-to-lawful-work (TLW)? Which one?</li>
-              <li><b>Lane fit:</b> What % of intended workers can be routed into existing legal lanes (FTA, LMIA-exempt, PR categories)? 17</li>
-              <li><b>Capacity:</b> What is the housing + healthcare absorption limit per region per quarter (not per year)?</li>
-              <li><b>Integrity:</b> What audit rate deters fraud without punishing honest applicants?</li>
-              <li><b>Equity:</b> How do we ensure Canadian workers and newcomers aren’t played against each other?</li>
-              <li><b>UX:</b> What documents create the most “rework loops” and how can we standardize them?</li>
-            </ul>
-          </div>
-        </details>
-
-        <details>
-          <summary>🧰 Policy lever library (non-exhaustive) <span class="tag">expand</span></summary>
-          <div class="content">
-            <ul>
-              <li><b>Pre-validation portal</b> for U.S. applicants (document completeness scoring + lane recommendation).</li>
-              <li><b>Employer enablement kit</b>: guided compliance, templated offers, and standardized job-duty mapping.</li>
-              <li><b>Risk triage</b>: low-variance cases fast-tracked; high-variance cases handled by specialized teams.</li>
-              <li><b>Transparency</b>: publish “top 10 delay causes” and how to avoid them (reduces repeated submissions).</li>
-              <li><b>Regional throttles</b>: intake tuned to real capacity rather than vibes.</li>
-            </ul>
-          </div>
-        </details>
-
-        <details>
-          <summary>🛡️ Safety & legitimacy checks <span class="tag">expand</span></summary>
-          <div class="content">
-            <ul>
-              <li>Does this change reduce incentives for misrepresentation?</li>
-              <li>Does it reduce officer discretion burden by clarifying evidence?</li>
-              <li>Can a journalist explain it in 90 seconds without it sounding like a cheat code?</li>
-              <li>Would a court view it as consistent with due process and administrative fairness?</li>
-            </ul>
-          </div>
-        </details>
-      </div>
-    </section>
-
-    <section class="lane" id="lane6">
-      <div class="laneBg" aria-hidden="true"></div>
-      <div class="laneHeader">
-        <div>
-          <h2>Module 06 — References, attributions, and “how to split into sequential files”</h2>
-          <div class="meta">Goal: clean citations + packaging workflow • output: reusable footer block</div>
-        </div>
-        <span class="tag">Seed for file: module-06/index.html</span>
-      </div>
-      <div class="laneBody">
-        <h3>Official references used in this kit</h3>
-        <ul>
-          <li>eTA eligibility: U.S. citizens exempt. 18</li>
-          <li>Work permit eligibility baseline factors. 19</li>
-          <li>Work in Canada under a free trade agreement. 20</li>
-          <li>Express Entry category-based selection categories. 21</li>
-          <li>Francophone Mobility work permit overview. 22</li>
-          <li>Employer compliance fee (IMP) overview. 23</li>
-          <li>Supplementary immigration levels info (2026–2028 context). 24</li>
-        </ul>
-
-        <h3>Attributions & licensing</h3>
-        <p class="note">
-          This page uses common open web UI patterns (sticky header, details/summary accordions, local-first storage).
-          No proprietary code copied. You can license your exported files however you want; consider a license that matches your deployment goals and public-interest intent.
-        </p>
-
-        <h3>How export works</h3>
-        <p>
-          When you click <b>Export Module</b>, this page generates a new standalone <span class="mono">index.html</span> containing:
-          (1) selected module content, (2) the same offline storage + HUD framework, and (3) a minimal TOC for the remaining modules.
-          You can repeat to build the whole sequence.
-        </p>
-      </div>
-    </section>
-
-    <footer class="foot" aria-label="Zero-Harm footer">
-      <
+<footer class="foot" aria-label="Zero-Harm footer">  
+  <
