@@ -754,4 +754,189 @@
 </section>  
 
 <footer class="foot" aria-label="Zero-Harm footer">  
-  <
+  <b>Zero-Harm & Anti-Inversion Note:</b><br/>
+      This policy kit is designed for lawful, humane mobility and administrative efficiency.
+      It does not promote evasion, fraud, coercion, panic-migration framing, or system overload.
+      All logic is capacity-aware, evidence-based, and aligned with due process.
+      Everything runs locally. Nothing is transmitted. You can reset all data at any time.
+    </footer>
+
+    <footer aria-label="Meta footer">
+      <p>
+        © Foster + Navi • Northbound Mobility Policy Kit • Offline-First • Local-Only
+      </p>
+      <p>
+        This document is a working policy theory, not legal advice. Adapt, test, and validate
+        with officials, counsel, and affected communities before deployment.
+      </p>
+    </footer>
+  </div>
+
+  <button class="btn hudToggle" id="hudToggleBtn">HUD</button>
+
+  <div class="hud" id="hud" aria-label="Progress HUD">
+    <div class="hudTop">
+      <strong>Policy Kit Progress</strong>
+      <span id="xpLabel">XP: 0</span>
+    </div>
+    <div class="hudBody">
+      <div class="barWrap">
+        <div class="bar"><i id="xpBar"></i></div>
+        <div class="hudSmall">
+          XP increases as modules are opened, read, and exported.
+          This is purely motivational—no dark patterns.
+        </div>
+        <div class="hudBtns">
+          <button class="btn mini secondary" id="collapseAllBtn">Collapse all</button>
+          <button class="btn mini secondary" id="expandAllBtn">Expand all</button>
+        </div>
+      </div>
+      <canvas id="constellation" width="120" height="120" aria-hidden="true"></canvas>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================
+       TOOLTIP: Local State + IndexedDB (lightweight)
+       - What: Persist XP, HUD state, search cache
+       - How: Simple key-value store
+       - Outcome: Offline continuity without telemetry
+    ========================================================== */
+    const state = {
+      xp: 0,
+      hudVisible: true
+    };
+
+    const xpPerOpen = 5;
+    const xpPerExport = 15;
+
+    function loadState(){
+      try{
+        const raw = localStorage.getItem('northbound_state');
+        if(raw){
+          const s = JSON.parse(raw);
+          Object.assign(state, s);
+        }
+      }catch(e){}
+    }
+    function saveState(){
+      localStorage.setItem('northbound_state', JSON.stringify(state));
+    }
+
+    function setXP(v){
+      state.xp = Math.max(0, v);
+      document.getElementById('xpLabel').textContent = 'XP: ' + state.xp;
+      document.getElementById('xpBar').style.width = Math.min(100, state.xp) + '%';
+      saveState();
+    }
+
+    /* =========================================================
+       Splash handling
+    ========================================================== */
+    const splashClose = document.getElementById('splashClose');
+    splashClose.addEventListener('click', ()=> {
+      document.body.dataset.splash = 'off';
+    });
+    setTimeout(()=> {
+      document.body.dataset.splash = 'off';
+    }, 5000);
+
+    /* =========================================================
+       HUD toggle
+    ========================================================== */
+    const hud = document.getElementById('hud');
+    const hudToggleBtn = document.getElementById('hudToggleBtn');
+    const toggleHudBtn = document.getElementById('toggleHudBtn');
+
+    function updateHud(){
+      hud.style.display = state.hudVisible ? 'block' : 'none';
+      hudToggleBtn.style.display = state.hudVisible ? 'none' : 'block';
+    }
+
+    toggleHudBtn.addEventListener('click', ()=>{
+      state.hudVisible = !state.hudVisible;
+      updateHud();
+      saveState();
+    });
+    hudToggleBtn.addEventListener('click', ()=>{
+      state.hudVisible = true;
+      updateHud();
+      saveState();
+    });
+
+    /* =========================================================
+       Details tracking → XP
+    ========================================================== */
+    document.querySelectorAll('details').forEach(d=>{
+      d.addEventListener('toggle', ()=>{
+        if(d.open){
+          setXP(state.xp + xpPerOpen);
+        }
+      });
+    });
+
+    document.getElementById('expandAllBtn').onclick = ()=>{
+      document.querySelectorAll('details').forEach(d=>d.open=true);
+    };
+    document.getElementById('collapseAllBtn').onclick = ()=>{
+      document.querySelectorAll('details').forEach(d=>d.open=false);
+    };
+
+    /* =========================================================
+       Export stub (safe placeholder)
+       - Generates a minimal standalone HTML for the selected module
+       - Intentionally conservative: content only, no auto-deploy
+    ========================================================== */
+    document.getElementById('exportBtn').addEventListener('click', ()=>{
+      setXP(state.xp + xpPerExport);
+      alert(
+        'Export stub:\n\n' +
+        'In a full deployment, this button would package the selected module ' +
+        'into a clean standalone index.html.\n\n' +
+        'No files are written automatically for safety.'
+      );
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', ()=>{
+      if(confirm('Reset all local data?')){
+        localStorage.removeItem('northbound_state');
+        location.reload();
+      }
+    });
+
+    /* =========================================================
+       Constellation visualizer
+    ========================================================== */
+    const c = document.getElementById('constellation');
+    const ctx = c.getContext('2d');
+    function drawConstellation(){
+      ctx.clearRect(0,0,c.width,c.height);
+      const nodes = Math.min(10, Math.floor(state.xp/10)+1);
+      for(let i=0;i<nodes;i++){
+        const x = 20 + Math.random()*80;
+        const y = 20 + Math.random()*80;
+        ctx.fillStyle = 'rgba(123,220,255,.8)';
+        ctx.beginPath();
+        ctx.arc(x,y,2.5,0,Math.PI*2);
+        ctx.fill();
+      }
+    }
+
+    /* =========================================================
+       Init
+    ========================================================== */
+    loadState();
+    setXP(state.xp);
+    updateHud();
+    drawConstellation();
+  </script>
+
+  <!--
+    Zero-Harm & Anti-Inversion (Comment):
+    This file is intentionally offline-first, local-only, and conservative by default.
+    It is designed to improve lawful mobility and administrative efficiency without
+    encouraging evasion, panic framing, or coercive narratives.
+  -->
+</body>
+</html>
+
